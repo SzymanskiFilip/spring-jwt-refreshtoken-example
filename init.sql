@@ -7,6 +7,15 @@ create table if not exists "users"
     roles    varchar(100) not null
 );
 
+create table if not exists "refresh_tokens"
+(
+    id         uuid DEFAULT gen_random_uuid() primary key,
+    user_id    uuid      not null,
+    token      uuid      not null,
+    expiryDate timestamp not null,
+    foreign key (user_id) references users (id)
+);
+
 insert into users (username, password, email, roles)
 values ('filip1', 'pwd', 'filip1@gmail.com', 'user;admin');
 
