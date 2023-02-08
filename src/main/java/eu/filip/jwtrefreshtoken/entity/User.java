@@ -2,6 +2,7 @@ package eu.filip.jwtrefreshtoken.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -13,6 +14,7 @@ import java.util.*;
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class User implements UserDetails {
 
     @Id
@@ -27,9 +29,6 @@ public class User implements UserDetails {
 
     private String roles;
 
-    public String getEmail(){
-        return email;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

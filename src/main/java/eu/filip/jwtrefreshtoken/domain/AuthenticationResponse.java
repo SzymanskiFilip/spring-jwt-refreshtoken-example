@@ -16,4 +16,5 @@ public class AuthenticationResponse {
     private String email;
     private Collection<? extends GrantedAuthority> authorities;
     private LocalDateTime expiryDate;
+    private String refreshToken;
 }
