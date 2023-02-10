@@ -1,72 +1,67 @@
 package eu.filip.jwtrefreshtoken.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import eu.filip.jwtrefreshtoken.entity.User;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JWTService {
     public static final String SECRET = "482B4D6251655468576D5A7134743777217A25432A462D4A404E635266556A58";
+    public static final String issuer = "JWT_APPLICATION";
 
+    private final long accessTokenExpiration;
+    private final long refreshTokenExpiration;
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    private JWTVerifier accessTokenVerifier;
+    private JWTVerifier refreshTokenVerifier;
+    private Algorithm algorithm;
+
+    public JWTService() throws UnsupportedEncodingException {
+        accessTokenExpiration = 1000 * 60 * 60 * 24;
+        refreshTokenExpiration = 1000 * 60 * 60 * 24;
+
+        algorithm = Algorithm.HMAC512(SECRET);
+        accessTokenVerifier = JWT.require(algorithm).withIssuer(issuer).build();
+        refreshTokenVerifier = JWT.require(algorithm).withIssuer(issuer).build();
     }
 
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    public String generateAccessToken(User user){
+        return JWT.create()
+                .withIssuer(issuer)
+                .withSubject(user.getId().toString())
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(new Date().getTime() + accessTokenExpiration))
+                .sign(algorithm);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    public String generateRefreshToken(){
+        return "";
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    public Optional<DecodedJWT> decodeAccessToken(String token){
+        try {
+            return Optional.of(accessTokenVerifier.verify(token));
+        } catch (JWTVerificationException e){
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public String getIdFromAccessToken(String token) {
+        return decodeAccessToken(token).get().getSubject();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
-
-    public String generateToken(String userName) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userName);
-    }
-
-    private String createToken(Map<String, Object> claims, String userName) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userName)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
-    }
-
-    private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
-        return Keys.hmacShaKeyFor(keyBytes);
+    public boolean validateAccessToken(String token){
+        return decodeAccessToken(token).isPresent();
     }
 }

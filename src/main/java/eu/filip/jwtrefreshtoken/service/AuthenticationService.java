@@ -2,6 +2,7 @@ package eu.filip.jwtrefreshtoken.service;
 
 import eu.filip.jwtrefreshtoken.domain.AuthenticationResponse;
 import eu.filip.jwtrefreshtoken.domain.LoginCredentials;
+import eu.filip.jwtrefreshtoken.entity.RefreshToken;
 import eu.filip.jwtrefreshtoken.entity.User;
 import eu.filip.jwtrefreshtoken.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthenticationService {
@@ -18,12 +20,14 @@ public class AuthenticationService {
     private final JWTService jwtService;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthenticationService(AuthenticationManager authenticationManager, JWTService jwtService, UserService userService, UserRepository userRepository) {
+    public AuthenticationService(AuthenticationManager authenticationManager, JWTService jwtService, UserService userService, UserRepository userRepository, RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public AuthenticationResponse authenticate(LoginCredentials loginCredentials) {
@@ -32,16 +36,14 @@ public class AuthenticationService {
         if (authentication.isAuthenticated()) {
             User user = userService.findByUsername(loginCredentials.getUsername());
 
-            //generate refresh token
 
             AuthenticationResponse response = new AuthenticationResponse(
-                    jwtService.generateToken(loginCredentials.getUsername()),
+                    jwtService.generateAccessToken(user),
                     user.getUsername(),
                     user.getEmail(),
                     user.getAuthorities(),
                     LocalDateTime.now().plusMinutes(30),
-                    //refreshToken.getToken().toString()
-                    "REFRESH TOKEN"
+                    "refreshhhhhhhhh"
             );
 
             return response;
@@ -50,7 +52,7 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse refreshToken(){
+    public AuthenticationResponse refreshToken(String token) {
         return null;
     }
 
