@@ -2,35 +2,28 @@ package eu.filip.jwtrefreshtoken.service;
 
 import eu.filip.jwtrefreshtoken.domain.AuthenticationResponse;
 import eu.filip.jwtrefreshtoken.domain.LoginCredentials;
-import eu.filip.jwtrefreshtoken.entity.RefreshToken;
 import eu.filip.jwtrefreshtoken.entity.User;
 import eu.filip.jwtrefreshtoken.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
     private final UserService userService;
-    private final RefreshTokenService refreshTokenService;
+    private final UserRepository userRepository;
 
-    public AuthenticationService(AuthenticationManager authenticationManager, JWTService jwtService, UserService userService, RefreshTokenService refreshTokenService) {
+    public AuthenticationService(AuthenticationManager authenticationManager, JWTService jwtService, UserService userService, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userService = userService;
-        this.refreshTokenService = refreshTokenService;
+        this.userRepository = userRepository;
     }
 
     public AuthenticationResponse authenticate(LoginCredentials loginCredentials) {
@@ -39,10 +32,7 @@ public class AuthenticationService {
         if (authentication.isAuthenticated()) {
             User user = userService.findByUsername(loginCredentials.getUsername());
 
-            //remove old refresh token
-            refreshTokenService.removeRefreshToken(user.getId());
-
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+            //generate refresh token
 
             AuthenticationResponse response = new AuthenticationResponse(
                     jwtService.generateToken(loginCredentials.getUsername()),
@@ -50,13 +40,18 @@ public class AuthenticationService {
                     user.getEmail(),
                     user.getAuthorities(),
                     LocalDateTime.now().plusMinutes(30),
-                    refreshToken.getToken().toString()
+                    //refreshToken.getToken().toString()
+                    "REFRESH TOKEN"
             );
 
             return response;
         } else {
             throw new UsernameNotFoundException("User not found");
         }
+    }
+
+    public AuthenticationResponse refreshToken(){
+        return null;
     }
 
 }

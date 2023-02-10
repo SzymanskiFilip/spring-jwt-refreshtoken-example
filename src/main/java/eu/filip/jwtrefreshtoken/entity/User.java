@@ -29,7 +29,6 @@ public class User implements UserDetails {
 
     private String roles;
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String[] splitedRoles = roles.split(";");

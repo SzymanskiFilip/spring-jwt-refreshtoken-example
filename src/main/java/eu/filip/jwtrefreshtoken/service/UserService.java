@@ -15,4 +15,8 @@ public class UserService {
     public User findByUsername(String username){
         return userRepository.findUserByUsername(username).get();
     }
+
+    public User findByRefreshToken(String refreshToken){
+        return userRepository.findUserByRefreshToken(refreshToken).get();
+    }
 }

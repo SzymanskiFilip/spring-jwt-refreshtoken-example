@@ -33,7 +33,7 @@ public class Config {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/login", "/test").permitAll()
+                .requestMatchers("/login", "/refreshToken").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
