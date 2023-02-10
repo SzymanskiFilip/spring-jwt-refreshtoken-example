@@ -36,6 +36,8 @@ public class AuthenticationService {
         if (authentication.isAuthenticated()) {
             User user = userService.findByUsername(loginCredentials.getUsername());
 
+            String refreshToken = jwtService.generateRefreshToken(user);
+            refreshTokenService.saveRefreshToken(user, refreshToken);
 
             AuthenticationResponse response = new AuthenticationResponse(
                     jwtService.generateAccessToken(user),
@@ -43,7 +45,7 @@ public class AuthenticationService {
                     user.getEmail(),
                     user.getAuthorities(),
                     LocalDateTime.now().plusMinutes(30),
-                    "refreshhhhhhhhh"
+                    refreshToken
             );
 
             return response;

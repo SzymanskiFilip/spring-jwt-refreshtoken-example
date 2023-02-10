@@ -27,7 +27,7 @@ public class JWTService {
     private Algorithm algorithm;
 
     public JWTService() throws UnsupportedEncodingException {
-        accessTokenExpiration = 1000 * 60 * 60 * 24;
+        accessTokenExpiration = 1000 * 60 * 30;
         refreshTokenExpiration = 1000 * 60 * 60 * 24;
 
         algorithm = Algorithm.HMAC512(SECRET);
@@ -35,7 +35,7 @@ public class JWTService {
         refreshTokenVerifier = JWT.require(algorithm).withIssuer(issuer).build();
     }
 
-    public String generateAccessToken(User user){
+    public String generateAccessToken(User user) {
         return JWT.create()
                 .withIssuer(issuer)
                 .withSubject(user.getId().toString())
@@ -44,14 +44,28 @@ public class JWTService {
                 .sign(algorithm);
     }
 
-    public String generateRefreshToken(){
-        return "";
+    public String generateRefreshToken(User user) {
+        return JWT.create()
+                .withIssuer(issuer)
+                .withSubject(user.getId().toString())
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(new Date().getTime() + refreshTokenExpiration))
+                .sign(algorithm);
     }
 
-    public Optional<DecodedJWT> decodeAccessToken(String token){
+    public Optional<DecodedJWT> decodeAccessToken(String token) {
         try {
             return Optional.of(accessTokenVerifier.verify(token));
-        } catch (JWTVerificationException e){
+        } catch (JWTVerificationException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    public Optional<DecodedJWT> decodeRefreshToken(String token) {
+        try {
+            return Optional.of(refreshTokenVerifier.verify(token));
+        } catch (JWTVerificationException e) {
             e.printStackTrace();
         }
         return Optional.empty();
@@ -61,7 +75,7 @@ public class JWTService {
         return decodeAccessToken(token).get().getSubject();
     }
 
-    public boolean validateAccessToken(String token){
+    public boolean validateAccessToken(String token) {
         return decodeAccessToken(token).isPresent();
     }
 }

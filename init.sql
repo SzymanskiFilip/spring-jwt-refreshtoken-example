@@ -9,9 +9,9 @@ create table if not exists "users"
 
 create table if not exists "refresh_tokens"
 (
-    id         uuid DEFAULT gen_random_uuid() primary key,
-    user_id    uuid      not null,
-    token      uuid      not null,
+    id          uuid DEFAULT gen_random_uuid() primary key,
+    user_id     uuid      not null,
+    token       text      not null,
     expiry_date timestamp not null,
     foreign key (user_id) references users (id)
 );

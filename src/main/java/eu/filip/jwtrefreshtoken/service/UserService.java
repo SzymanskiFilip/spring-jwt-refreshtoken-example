@@ -4,6 +4,8 @@ import eu.filip.jwtrefreshtoken.entity.User;
 import eu.filip.jwtrefreshtoken.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -17,6 +19,6 @@ public class UserService {
     }
 
     public User findByRefreshToken(String refreshToken){
-        return userRepository.findUserByRefreshToken(refreshToken).get();
+        return userRepository.findUserByRefreshToken(UUID.fromString(refreshToken)).get();
     }
 }
