@@ -21,4 +21,8 @@ public class UserService {
     public User findByRefreshToken(String refreshToken){
         return userRepository.findUserByRefreshToken(UUID.fromString(refreshToken)).get();
     }
+
+    public User findByUserID(String user_id){
+        return userRepository.findById(UUID.fromString(user_id)).get();
+    }
 }

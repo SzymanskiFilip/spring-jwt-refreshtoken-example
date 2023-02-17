@@ -33,12 +33,13 @@ public class Config {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/login", "/refreshToken").permitAll()
+                .requestMatchers("/login", "/refreshToken", "/logout").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                .logout().disable()
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

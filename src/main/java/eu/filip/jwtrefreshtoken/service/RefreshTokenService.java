@@ -17,12 +17,16 @@ public class RefreshTokenService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public void deleteRefreshTokenByUser(User user) {
-
+    public void deleteRefreshTokens(User user){
+        refreshTokenRepository.deleteAllByUser_id(user.getId());
     }
 
     public RefreshToken saveRefreshToken(User user, String token) {
         RefreshToken refreshToken = new RefreshToken(user, token, LocalDateTime.now().plusHours(24));
         return refreshTokenRepository.save(refreshToken);
+    }
+
+    public RefreshToken getRefreshTokenByToken(String token){
+        return refreshTokenRepository.findRefreshTokenByToken(token).get();
     }
 }

@@ -78,4 +78,8 @@ public class JWTService {
     public boolean validateAccessToken(String token) {
         return decodeAccessToken(token).isPresent();
     }
+
+    public boolean validateRefreshToken(String token){
+        return decodeRefreshToken(token).isPresent();
+    }
 }

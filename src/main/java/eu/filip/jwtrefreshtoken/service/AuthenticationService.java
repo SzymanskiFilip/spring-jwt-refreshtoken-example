@@ -48,6 +48,8 @@ public class AuthenticationService {
                     refreshToken
             );
 
+            System.out.println("token: " + response.getToken());
+
             return response;
         } else {
             throw new UsernameNotFoundException("User not found");
@@ -55,7 +57,34 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse refreshToken(String token) {
+        RefreshToken refreshToken = refreshTokenService.getRefreshTokenByToken(token);
+
+        String newRefreshToken = jwtService.generateRefreshToken(refreshToken.getUser());
+        refreshTokenService.saveRefreshToken(refreshToken.getUser(), newRefreshToken);
+
+        if(jwtService.validateRefreshToken(token)){
+            AuthenticationResponse authenticationResponse = new AuthenticationResponse(
+                    jwtService.generateAccessToken(refreshToken.getUser()),
+                    refreshToken.getUser().getUsername(),
+                    refreshToken.getUser().getEmail(),
+                    refreshToken.getUser().getAuthorities(),
+                    LocalDateTime.now().plusMinutes(30),
+                    newRefreshToken
+            );
+
+            return authenticationResponse;
+        } else {
+            refreshTokenService.deleteRefreshTokens(refreshToken.getUser());
+        }
+
         return null;
+    }
+
+    public void logout(String refreshToken) {
+        RefreshToken token = refreshTokenService.getRefreshTokenByToken(refreshToken);
+        User user = token.getUser();
+        System.out.println(user.getUsername() + " is trying to log out");
+        refreshTokenService.deleteRefreshTokens(user);
     }
 
 }

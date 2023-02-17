@@ -27,4 +27,20 @@ public class RefreshToken {
         this.token = token;
         this.expiry_date = expiry_date;
     }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public LocalDateTime getExpiry_date() {
+        return expiry_date;
+    }
 }
